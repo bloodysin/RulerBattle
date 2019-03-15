@@ -12,10 +12,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
-#include <glm/ext.hpp>
 
 #include "camera.h"
-#include "obj_loader.h"
+#include "control.h"
+#include "ruler.h"
 #include "shader.h"
+
+// external library
+#include "lodepng.h"
 
 #endif

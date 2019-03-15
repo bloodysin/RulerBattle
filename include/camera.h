@@ -10,13 +10,12 @@ class Camera {
   private:
     float speed;
     glm::vec3 pos;
+    unsigned int level;
   public:
     Camera();
     void move(glm::vec3 variation);
     glm::mat4 getViewMatrix();
     glm::mat4 getProjectionMatrix();
 };
-
-void getDeviceInput();
 
 #endif

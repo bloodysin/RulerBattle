@@ -1,11 +1,12 @@
 .SUFFIXES: .cpp
 
 CXX = g++-7
-CXXFLAGS = -std=c++11 -I./include -framework OpenGL
+CXXFLAGS = -std=c++11 -I./include -I./external -framework OpenGL
 LDFLAGS = -lglfw -lglew
 
 ODIR = include
-OBJ = main.o $(ODIR)/shader.o $(ODIR)/camera.o $(ODIR)/ruler.o
+LIBDIR = external
+OBJ = main.o $(ODIR)/shader.o $(ODIR)/camera.o $(ODIR)/ruler.o $(ODIR)/model_loader.o $(ODIR)/control.o $(LIBDIR)/lodepng.o
 
 %.o: %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
