@@ -44,7 +44,7 @@ int main() {
 
   // Remain the key input until glfwGetKey is called
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-  // glfwSetKeyCallback(window, key_callback);
+  glfwSetKeyCallback(window, key_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwPollEvents();
   glfwSetCursorPos(window, 960/2, 720/2); // set mouse cursor to the center of the window
@@ -57,14 +57,18 @@ int main() {
   // glEnable(GL_CULL_FACE);
 
   
-  // create objects
-  Ruler ruler1(glm::vec3(0.0f, 0.0f, 0.0f));
-  Ruler ruler2(glm::vec3(0.0f, 0.0f, 1.0f));
+  // create objects and bind the pointer to window pointer
+  std::vector<Ruler> ruler_list;
+  ruler_list.push_back(Ruler(0, glm::vec3( 0.0f, 0.0f, 0.0f)));
+  ruler_list.push_back(Ruler(1, glm::vec3( 1.0f, 0.0f, 0.0f)));
+  glfwSetWindowUserPointer(window, &ruler_list);
+  // Ruler ruler1(glm::vec3(0.0f, 0.0f, 0.0f));
+  // Ruler ruler2(glm::vec3(0.0f, 0.0f, 1.0f));
+
   // load model information
   std::vector<glm::vec3> vertex_buffer_data, normal_vertex_buffer_data;
   std::vector<glm::vec2> uv_vertex_buffer_data;
-  // bool result = load_obj("model/ruler.obj", vertex_buffer_data, uv_vertex_buffer_data, normal_vertex_buffer_data);
-  bool result = ruler1.initialize(vertex_buffer_data, uv_vertex_buffer_data, normal_vertex_buffer_data);
+  bool result = initialize_ruler(vertex_buffer_data, uv_vertex_buffer_data, normal_vertex_buffer_data);
   if(!result) {
     return 0;
   }
@@ -75,12 +79,21 @@ int main() {
   vertex_buffer_data.push_back(glm::vec3(-2.0f, 0.0f,  1.5f));
   vertex_buffer_data.push_back(glm::vec3( 2.0f, 0.0f,  1.5f));
   vertex_buffer_data.push_back(glm::vec3( 2.0f, 0.0f, -1.5f));
+
+  vertex_buffer_data.push_back(glm::vec3( 0.0f, 0.0f, 0.0f));
+  vertex_buffer_data.push_back(glm::vec3(-1.0f, 0.0f, 0.0f));
+  vertex_buffer_data.push_back(glm::vec3( 0.093152f, 0.0f, 0.000074f));
+
   uv_vertex_buffer_data.push_back(glm::vec2(1.0f, 1.0f));
   uv_vertex_buffer_data.push_back(glm::vec2(0.0f, 1.0f));
   uv_vertex_buffer_data.push_back(glm::vec2(0.0f, 0.0f));
   uv_vertex_buffer_data.push_back(glm::vec2(0.0f, 0.0f));
   uv_vertex_buffer_data.push_back(glm::vec2(1.0f, 0.0f));
   uv_vertex_buffer_data.push_back(glm::vec2(1.0f, 1.0f));
+
+  uv_vertex_buffer_data.push_back(glm::vec2(0.0f, 0.0f));
+  uv_vertex_buffer_data.push_back(glm::vec2(0.0f, 0.5f));
+  uv_vertex_buffer_data.push_back(glm::vec2(0.5f, 0.0f));
 
   // load shader from path
   GLuint program_id = loadShaders("shader/shader.vert", "shader/shader.frag");
@@ -119,13 +132,15 @@ int main() {
   // ruler_model_matrix = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f)) * ruler_model_matrix;
   // set camera postion
   glm::mat4 vp_matrix = camera.getProjectionMatrix() * camera.getViewMatrix();
-  glm::mat4 ruler_mvp_matrix = vp_matrix * ruler1.getModelMatrix();
-  std::cout << "ruler1: " << glm::to_string(ruler1.getModelMatrix()) << std::endl;
-  glm::mat4 ruler_mvp_matrix2 = vp_matrix * ruler2.getModelMatrix();
+  glm::mat4 ruler_mvp_matrix = vp_matrix * ruler_list[0].getModelMatrix();
+  std::cout << "ruler1: " << glm::to_string(ruler_list[0].getModelMatrix()) << std::endl;
+  glm::mat4 ruler_mvp_matrix2 = vp_matrix * ruler_list[1].getModelMatrix();
   glm::mat4 desk_mvp_matrix = vp_matrix * desk_model_matrix;
 
   double last_time = glfwGetTime();
   double current_time = glfwGetTime();
+
+  // addForce(ruler1, 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
   // animation loop until Esc is pressed
   do{
     current_time = glfwGetTime();
@@ -133,13 +148,16 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     getDeviceInput();
+    ruler_list[0].update();
+    ruler_list[1].update();
+
     vp_matrix = camera.getProjectionMatrix() * camera.getViewMatrix();
-    ruler_mvp_matrix = vp_matrix * ruler1.getModelMatrix();
-    ruler_mvp_matrix2 = vp_matrix * ruler2.getModelMatrix();
+    ruler_mvp_matrix = vp_matrix * ruler_list[0].getModelMatrix();
+    ruler_mvp_matrix2 = vp_matrix * ruler_list[1].getModelMatrix();
     desk_mvp_matrix = vp_matrix * desk_model_matrix;
     
     glUseProgram(program_id);
-
+    
     // write matrix into program
     glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &ruler_mvp_matrix[0][0]);
 
@@ -161,15 +179,18 @@ int main() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     // draw rulers
-    glDrawArrays(GL_TRIANGLES, 0, vertex_buffer_data.size() - 6);
+    glDrawArrays(GL_TRIANGLES, 0, vertex_buffer_data.size() - 9);
     // glDrawArrays(GL_TRIANGLES, 0, test);
-    // glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &ruler_mvp_matrix2[0][0]);
-    // glDrawArrays(GL_TRIANGLES, 0, vertex_buffer_data.size() - 6);
+    glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &ruler_mvp_matrix2[0][0]);
+    glDrawArrays(GL_TRIANGLES, 0, vertex_buffer_data.size() - 9);
+
+    glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &vp_matrix[0][0]);
+    glDrawArrays(GL_TRIANGLES, vertex_buffer_data.size() - 3, 3);
 
     // draw desk
     glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &desk_mvp_matrix[0][0]);
     glBindTexture(GL_TEXTURE_2D, desk_tex_id);
-    glDrawArrays(GL_TRIANGLES, vertex_buffer_data.size() - 6, 6);
+    glDrawArrays(GL_TRIANGLES, vertex_buffer_data.size() - 9, 6);
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
@@ -187,6 +208,7 @@ int main() {
   glDeleteTextures(1, &ruler_tex_id);
   glDeleteTextures(1, &desk_tex_id);
   glDeleteVertexArrays(1, &vertex_array_id);
+  // free(&ruler_list);
 
   glfwTerminate();
   return 0;

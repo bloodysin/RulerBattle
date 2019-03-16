@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 
 #include "camera.h"
+#include "physics.h"
+#include "ruler.h"
 
 void getDeviceInput();
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);

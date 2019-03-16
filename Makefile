@@ -6,7 +6,7 @@ LDFLAGS = -lglfw -lglew
 
 ODIR = include
 LIBDIR = external
-OBJ = main.o $(ODIR)/shader.o $(ODIR)/camera.o $(ODIR)/ruler.o $(ODIR)/model_loader.o $(ODIR)/control.o $(LIBDIR)/lodepng.o
+OBJ = main.o $(ODIR)/shader.o $(ODIR)/camera.o $(ODIR)/ruler.o $(ODIR)/model_loader.o $(ODIR)/control.o $(ODIR)/physics.o $(LIBDIR)/lodepng.o
 
 %.o: %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)

@@ -24,8 +24,15 @@ void getDeviceInput() {
   // last_time = current_time;
 }
 
-// void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-// }
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  if(key == GLFW_KEY_A && action == GLFW_PRESS) {
+    // std::cout << "test" << std::endl;
+    std::vector<Ruler> *ruler_list = (std::vector<Ruler>*)glfwGetWindowUserPointer(window);
+    // std::cout << glm::to_string((*ruler_list)[0].getVelocity()) << std::endl;
+    addForce((*ruler_list)[0], 5.0f, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(12.5f, 0.0f, -1.5f));
+  // addForce(ruler1, 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+  }
+}
 
 void cursor_ray_screen2world(int screen_x, int screen_y, int screen_width, int screen_height,
     glm::mat4 view_matrix, glm::mat4 projection_matrix, glm::vec3 &out_ray_origin, glm::vec3 &out_ray_direction) {

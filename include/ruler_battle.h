@@ -2,6 +2,7 @@
 #define RULER_BATTLE_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <vector>
 
 // OpenGL tools
@@ -15,6 +16,7 @@
 
 #include "camera.h"
 #include "control.h"
+#include "physics.h"
 #include "ruler.h"
 #include "shader.h"
 
