@@ -12,8 +12,8 @@ bool initialize_ruler(std::vector<glm::vec3>& vertices,
   return result;
 }
 
-Ruler::Ruler(unsigned int id, glm::vec3 p) : object_id(id), pos(p) {
-  radian = 0.5f * 3.14f;
+Ruler::Ruler(unsigned int id, glm::vec3 p, float r) : object_id(id), pos(p), radian(r) {
+  // radian = 0.5f * 3.14f;
   velocity = glm::vec3(0.0f, 0.0f, 0.0f);
   angular_velocity = 0.0f;
   moment_of_inertia = 0.01f;
@@ -53,6 +53,7 @@ void Ruler::update() {
   // if velocity is not zero
   if(!glm::all(glm::epsilonEqual(velocity, glm::vec3(0.0f, 0.0f, 0.0f), 0.0001f))) {
     move(velocity * delta_time, angular_velocity * delta_time);
+    std::cout << object_id << ": " << " pos: " << glm::to_string(pos) << " , angle: " << radian << std::endl;
     // std::cout << glm::to_string(glm::epsilonEqual(velocity, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f)) << std::endl;
     // frictional force of the desk
     addForce(*this, 0.5f, glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
@@ -65,7 +66,8 @@ void Ruler::update() {
       std::cout << "pos: "<< glm::to_string(pos) << std::endl;
       velocity = glm::vec3(0.0f, 0.0f, 0.0f);
       angular_velocity = 0.0f;
-      addForce((*ruler_list)[1-object_id], 5.0f, glm::vec3(result.intersection.x, 0.0f, result.intersection.y), glm::vec3(12.5f, 0.0f, -1.5f));
+      addForce((*ruler_list)[1-object_id], 5.0f,
+          glm::vec3(result.intersection.x, 0.0f, result.intersection.y), glm::vec3(12.5f, 0.0f, -1.5f));
     };
   }
 }
@@ -95,7 +97,7 @@ glm::vec2 Ruler::support_function(glm::vec2 direction) {
       max_vertex = vertex_2d_world_space;
     }
   }
-  // std::cout << "max vertex: " << glm::to_string(max_vertex)
+  // std::cout << "ruler " << object_id << "   max vertex: " << glm::to_string(max_vertex)
     // << "  direction: " << glm::to_string(direction) << std::endl;
   return max_vertex;
 }

@@ -25,7 +25,7 @@ class Ruler {
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> vertices_2d_box_modelspace;
   public:
-    Ruler(unsigned int id, glm::vec3 p);
+    Ruler(unsigned int id, glm::vec3 p, float r);
     glm::mat4 getModelMatrix();
     glm::vec3 getVelocity();
     void setVelocity(glm::vec3 _velocity);

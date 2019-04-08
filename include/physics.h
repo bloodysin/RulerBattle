@@ -109,7 +109,13 @@ CollisionResult collision_detection(T &object_a, T &object_b) {
       // add support vertex
       glm::vec2 minkowski_diff = object_a.support_function(direction) 
         - object_b.support_function(-1 * direction);
+      // std::cout << "direction: " << glm::to_string(direction) << std::endl;
+      // std::cout << "diff: " << glm::to_string(minkowski_diff) << std::endl;
       simplex.push_back(minkowski_diff);
+      // std::cout << "num: " << simplex.size() << std::endl;
+      // for(int i = 0; i < simplex.size(); i++) {
+        // std::cout << "no: " << i  << " : " <<  glm::to_string(simplex[i]) << std::endl;
+      // }
       if(glm::dot(direction, minkowski_diff) > 0) {
         status = 2;
       }
