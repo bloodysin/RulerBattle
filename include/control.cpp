@@ -6,6 +6,7 @@ extern GLFWwindow* window;
 extern Camera camera;
 extern float delta_time;
 extern glm::vec3 cursor_click_point;
+extern std::vector<Ruler> ruler_list;
 
 void getDeviceInput() {
   // get keyboard input
@@ -21,17 +22,34 @@ void getDeviceInput() {
   if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
     camera.move(glm::vec3(1.0f, 0.0f, 0.0f) * delta_time);
   }
+  if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    ruler_list[0].move(glm::vec3(0.0f, 0.0f, -1.0f) * delta_time, 0);
+  }
+  if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    ruler_list[0].move(glm::vec3(-1.0f, 0.0f, 0.0f) * delta_time, 0);
+  }
+  if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    ruler_list[0].move(glm::vec3(0.0f, 0.0f, 1.0f) * delta_time, 0);
+  }
+  if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    ruler_list[0].move(glm::vec3(1.0f, 0.0f, 0.0f) * delta_time, 0);
+  }
+  if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+    ruler_list[0].move(glm::vec3(0.0f, 0.0f, 0.0f), 1.2 * delta_time);
+  }
+  if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+    ruler_list[0].move(glm::vec3(0.0f, 0.0f, 0.0f), -1.2 * delta_time);
+  }
   // last_time = current_time;
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  if(key == GLFW_KEY_A && action == GLFW_PRESS) {
-    // std::cout << "test" << std::endl;
-    std::vector<Ruler> *ruler_list = (std::vector<Ruler>*)glfwGetWindowUserPointer(window);
-    // std::cout << glm::to_string((*ruler_list)[0].getVelocity()) << std::endl;
-    addForce((*ruler_list)[0], 5.0f, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(12.5f, 0.0f, -1.5f));
-  // addForce(ruler1, 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-  }
+  // if(key == GLFW_KEY_W && action == GLFW_PRESS) {
+    // move ruler up
+    // std::vector<Ruler> *ruler_list = (std::vector<Ruler>*)glfwGetWindowUserPointer(window);
+    // addForce((*ruler_list)[0], 5.0f, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(12.5f, 0.0f, -1.5f));
+    // (*ruler_list)[0].move(glm::vec3(0.0f, 0.0f, -1.0f) * delta_time, 0);
+  // }
 }
 
 void cursor_ray_screen2world(int screen_x, int screen_y, int screen_width, int screen_height,

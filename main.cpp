@@ -7,6 +7,7 @@ GLFWwindow* window;
 Camera camera;
 float delta_time;
 glm::vec3 cursor_click_point;
+std::vector<Ruler> ruler_list;
 
 int main() {
   cursor_click_point = glm::vec3(10.0f, 10.0f, 10.0f);
@@ -56,10 +57,8 @@ int main() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   // glEnable(GL_CULL_FACE);
-
   
   // create objects and bind the pointer to window pointer
-  std::vector<Ruler> ruler_list;
   ruler_list.push_back(Ruler(0, glm::vec3( 0.0f, 0.0f, 0.0f), 0.5f * 3.14f));
   ruler_list.push_back(Ruler(1, glm::vec3( 1.0f, 0.0f, 0.0f), 0.5f * 3.14f));
   glfwSetWindowUserPointer(window, &ruler_list);
@@ -149,6 +148,8 @@ int main() {
   double last_time = glfwGetTime();
   double current_time = glfwGetTime();
 
+  ruler_list[0].update();
+  ruler_list[1].update();
   // animation loop until Esc is pressed
   do{
     current_time = glfwGetTime();
@@ -157,7 +158,7 @@ int main() {
 
     getDeviceInput();
     ruler_list[0].update();
-    ruler_list[1].update();
+    // ruler_list[1].update();
 
     view_matrix = camera.getViewMatrix();
     vp_matrix = camera.getProjectionMatrix() * view_matrix;

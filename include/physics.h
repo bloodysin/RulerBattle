@@ -23,22 +23,16 @@ template<class T>
 void addForce(T &object, float force, glm::vec3 direction, glm::vec3 r) {
   direction = glm::normalize(direction);
   glm::vec3 force_vector = force * direction;
-  // std::cout << "force vector: " << glm::to_string(force_vector) << std::endl;
-  // std::cout << "delta_time: " << delta_time << std::endl;
-  // glm::vec3 velocity = force_vector * delta_time;
   glm::vec3 velocity = object.getVelocity() + force_vector;
   object.setVelocity(velocity);
-  // std::cout << "set speed: " << glm::to_string(velocity) << std::endl;
   // since ruler is moved on fixed y-axis, torque is computed in 2d demension
   float torque = r.x * force_vector.z + r.z * force_vector.x;
   float angular_acceleration = torque / object.getMomentOfInertia();
   float angular_velocity = object.getAngularVelocity() + angular_acceleration * delta_time;
   object.setAngularVelocity(angular_velocity);
-  // std::cout << "set angular speed: " << angular_velocity << std::endl;
 }
 
-// The following functions are all for collision detection by GJK algorithm
-// penetration vector is calculated by EPA method(expanding polytype algorithm)
+// The following functions are all for collision detection
 // In this game, only 2d collision detection is needed. 
 struct CollisionResult {
   bool is_collided;
@@ -56,8 +50,55 @@ struct Edge {
 
 Edge find_closest_edge(unsigned int winding, std::vector<glm::vec2> simplex);
 
+// Collision detection by SAT(seperating axis theorm)
 template<class T>
-CollisionResult collision_detection(T &object_a, T &object_b) {
+CollisionResult collision_detection_SAT(T &object_a, T &object_b) {
+  CollisionResult result;
+  result.is_collided = true;
+  //TODO do circle collision check first to reduce cost
+
+  //  calculate the axis of minimum penetration
+  std::vector<glm::vec2> vertices = object_a.getVertices();
+  std::vector<glm::vec2> norms = object_a.getNormals();
+  float max_projection_a = -FLT_MAX;
+  glm::vec2 min_support_a;
+  for(int i = 0; i < norms.size(); i++) {
+    glm::vec2 support_point = object_b.supportPoint(norms[i] * glm::vec2(-1, -1));
+    float projection = glm::dot(support_point - vertices[i], norms[i]);
+    if(projection > max_projection_a) {
+      max_projection_a = projection;
+      min_support_a = support_point;
+    }
+  }
+  if(max_projection_a > 0) {
+    result.is_collided = false;
+    return result;
+  }
+  vertices = object_b.getVertices();
+  norms = object_b.getNormals();
+  float max_projection_b = -FLT_MAX;
+  glm::vec2 min_support_b;
+  for(int i = 0; i < norms.size(); i++) {
+    glm::vec2 support_point = object_a.supportPoint(norms[i] * glm::vec2(-1, -1));
+    float projection = glm::dot(support_point - vertices[i], norms[i]);
+    if(projection > max_projection_b) {
+      max_projection_b = projection;
+      min_support_b = support_point;
+    }
+  }
+  if(max_projection_b > 0) {
+    result.is_collided = false;
+    return result;
+  }
+  result.intersection = (max_projection_a > max_projection_b) ? min_support_a : min_support_b;
+  return result;
+}
+
+// TODO
+// Collision detection by GJK algorithm, uncompleted
+// penetration vector is calculated by EPA method(expanding polytype algorithm)
+template<class T>
+CollisionResult collision_detection_GJK(T &object_a, T &object_b) {
   CollisionResult result;
   std::vector<glm::vec2> simplex;
   // detection status: 0 - no intersection, 1 - found intersection, 2 - still finding
@@ -68,7 +109,7 @@ CollisionResult collision_detection(T &object_a, T &object_b) {
     switch(simplex.size()) {
       case 0:
         // point a: choose the direction that connect two objects' center
-        direction = object_b.get_center() - object_a.get_center();
+        direction = object_b.getCenter() - object_a.getCenter();
         break;
       case 1:
         // point b: choose the reverse direction of first simplex
@@ -107,8 +148,8 @@ CollisionResult collision_detection(T &object_a, T &object_b) {
     }
     if(status != 1) {
       // add support vertex
-      glm::vec2 minkowski_diff = object_a.support_function(direction) 
-        - object_b.support_function(-1 * direction);
+      glm::vec2 minkowski_diff = object_a.supportPoint(direction) 
+        - object_b.supportPoint(-1 * direction);
       // std::cout << "direction: " << glm::to_string(direction) << std::endl;
       // std::cout << "diff: " << glm::to_string(minkowski_diff) << std::endl;
       simplex.push_back(minkowski_diff);
@@ -138,8 +179,8 @@ CollisionResult collision_detection(T &object_a, T &object_b) {
     if(e0 + e1 + e2 < 0) winding = 1;
     for(int i = 0; i < 32; i++) {
       Edge edge = find_closest_edge(winding, simplex);
-      glm::vec2 minkowski_diff = object_a.support_function(edge.normal) 
-        - object_b.support_function(-1 * edge.normal);
+      glm::vec2 minkowski_diff = object_a.supportPoint(edge.normal) 
+        - object_b.supportPoint(-1 * edge.normal);
       float distance = glm::dot(minkowski_diff, edge.normal);
 
       intersection = edge.normal;

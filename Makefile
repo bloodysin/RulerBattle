@@ -1,6 +1,6 @@
 .SUFFIXES: .cpp
 
-CXX = g++-7
+CXX = g++
 CXXFLAGS = -std=c++11 -I./include -I./external -framework OpenGL
 LDFLAGS = -lglfw -lglew
 
